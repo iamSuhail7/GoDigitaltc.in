@@ -1,14 +1,22 @@
-FROM python:3.9
+# this is my base image
+FROM alpine:3.5
 
-# Install AWS CLI and other dependencies
-RUN apt-get update && \
-    apt-get install -y awscli
+# Install python and pip
+RUN apk add --update py2-pip
 
-# Add your Python program code
-COPY Dockerfile_program.py /app/
+# Install curl
+RUN apk --no-cache add curl
 
-# Set the working directory
-WORKDIR /app/
+# install Python modules needed by the Python app
+COPY requirements.txt /usr/src/app/
+RUN pip install --no-cache-dir -r /usr/src/app/requirements.txt
 
-# Run your Python program
-CMD ["python", "Dockerfile_program.py"]
+# copy files required for the app to run
+COPY app.py /usr/src/app/
+COPY templates/index.html /usr/src/app/templates/
+
+# tell the port number the container should expose
+EXPOSE 5000
+
+# run the application
+CMD ["python", "/usr/src/app/app.py"]
